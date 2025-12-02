@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: crypto-service
+
+  # PostgreSQL configuration for production
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:secretdb}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:secretuser}
+    password: ${DB_PASSWORD:secretpass}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# NATS configuration
+nats:
+  server:
+    url: ${NATS_URL:nats://nats:4222}
+  connection:
+    name: crypto-service
+    timeout: 10
+  reconnect:
+    max-attempts: -1
+    wait-ms: 2000
+  tls:
+    enabled: ${NATS_TLS_ENABLED:false}
+  nkey:
+    seed: ${NATS_NKEY_SEED:}
+
+# Crypto configuration
+crypto:
+  aes:
+    key-length: ${CRYPTO_KEY_LENGTH:256}
+  max-tries: ${CRYPTO_MAX_TRIES:3}
+  password:
+    length: ${CRYPTO_PASSWORD_LENGTH:16}
+  cleanup:
+    max-age-days: ${CRYPTO_MAX_AGE_DAYS:2}
+    interval-ms: ${CRYPTO_CLEANUP_INTERVAL_MS:3600000}
+
+# Server configuration
+server:
+  port: 8080
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.agency.crypto: INFO
+    io.nats: WARN

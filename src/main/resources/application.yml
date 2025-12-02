@@ -1,0 +1,81 @@
+spring:
+  application:
+    name: crypto-service
+
+  # Database configuration
+  datasource:
+    url: jdbc:h2:mem:secretdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # H2 Console (for development only)
+  h2:
+    console:
+      enabled: false
+
+# NATS configuration
+nats:
+  server:
+    url: ${NATS_URL:nats://localhost:4222}
+  connection:
+    name: crypto-service
+    timeout: 5
+  reconnect:
+    max-attempts: 10
+    wait-ms: 2000
+  # TLS configuration (for bonus feature)
+  tls:
+    enabled: ${NATS_TLS_ENABLED:false}
+  # NKey authentication (for bonus feature)
+  nkey:
+    seed: ${NATS_NKEY_SEED:}
+
+# Crypto configuration
+crypto:
+  # AES key length in bits (128, 192, or 256)
+  aes:
+    key-length: ${CRYPTO_KEY_LENGTH:256}
+  # Maximum decryption attempts before message deletion
+  max-tries: ${CRYPTO_MAX_TRIES:3}
+  # Auto-generated password length
+  password:
+    length: ${CRYPTO_PASSWORD_LENGTH:16}
+  # Cleanup scheduler configuration
+  cleanup:
+    # Maximum age of messages in days before auto-deletion
+    max-age-days: ${CRYPTO_MAX_AGE_DAYS:2}
+    # Cleanup interval in milliseconds (default: 1 hour)
+    interval-ms: ${CRYPTO_CLEANUP_INTERVAL_MS:3600000}
+
+# Server configuration
+server:
+  port: 8080
+
+# Actuator configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.agency.crypto: DEBUG
+    io.nats: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

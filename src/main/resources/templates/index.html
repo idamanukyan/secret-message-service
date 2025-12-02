@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Agency Message Service</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            font-size: 1.1em;
+            color: #888;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab.active {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border-color: #00d4ff;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0 0 15px 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.success {
+            background: rgba(0, 255, 100, 0.1);
+            border: 1px solid rgba(0, 255, 100, 0.3);
+            display: block;
+        }
+
+        .result.error {
+            background: rgba(255, 50, 50, 0.1);
+            border: 1px solid rgba(255, 50, 50, 0.3);
+            display: block;
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+            color: #00d4ff;
+        }
+
+        .result.error h3 {
+            color: #ff5555;
+        }
+
+        .result-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            word-break: break-all;
+        }
+
+        .result-item label {
+            font-size: 0.85em;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .result-item .value {
+            font-family: 'Courier New', monospace;
+            color: #00ff88;
+            font-size: 0.95em;
+        }
+
+        .copy-btn {
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid #00d4ff;
+            padding: 5px 15px;
+            border-radius: 5px;
+            color: #00d4ff;
+            cursor: pointer;
+            font-size: 0.85em;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: #00d4ff;
+            color: #000;
+        }
+
+        .warning {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 200, 0, 0.1);
+            border: 1px solid rgba(255, 200, 0, 0.3);
+            border-radius: 8px;
+            color: #ffc800;
+            font-size: 0.9em;
+        }
+
+        .secret-message {
+            padding: 20px;
+            background: rgba(0, 255, 100, 0.1);
+            border-radius: 10px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #00ff88;
+            margin-top: 10px;
+        }
+
+        .tries-warning {
+            color: #ff8800;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #555;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Secret Agency Message Service</h1>
+            <p class="subtitle">Self-Destructing Encrypted Messages</p>
+        </header>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('save')">Create Secret</div>
+            <div class="tab" onclick="showTab('receive')">Retrieve Secret</div>
+        </div>
+
+        <!-- Save Message Tab -->
+        <div id="save-tab" class="card">
+            <form id="save-form" onsubmit="saveMessage(event)">
+                <div class="form-group">
+                    <label for="message">Secret Message</label>
+                    <textarea id="message" placeholder="Enter your secret message..." required></textarea>
+                </div>
+                <button type="submit" class="btn" id="save-btn">Encrypt & Save</button>
+            </form>
+
+            <div id="save-result" class="result">
+                <h3>Message Saved Successfully!</h3>
+                <div class="result-item">
+                    <label>Message ID</label>
+                    <div class="value" id="result-id"></div>
+                    <button class="copy-btn" onclick="copyToClipboard('result-id')">Copy</button>
+                </div>
+                <div class="result-item">
+                    <label>Password (auto-generated)</label>
+                    <div class="value" id="result-password"></div>
+                    <button class="copy-btn" onclick="copyToClipboard('result-password')">Copy</button>
+                </div>
+                <div class="result-item">
+                    <label>AES Key</label>
+                    <div class="value" id="result-key"></div>
+                    <button class="copy-btn" onclick="copyToClipboard('result-key')">Copy</button>
+                </div>
+                <div class="warning">
+                    <strong>Important:</strong> Share the Message ID, Password, and AES Key with the recipient via separate secure channels.
+                    The message can only be read once and will self-destruct after 3 failed attempts.
+                </div>
+            </div>
+
+            <div id="save-error" class="result">
+                <h3>Error</h3>
+                <p id="save-error-msg"></p>
+            </div>
+        </div>
+
+        <!-- Receive Message Tab -->
+        <div id="receive-tab" class="card hidden">
+            <form id="receive-form" onsubmit="receiveMessage(event)">
+                <div class="form-group">
+                    <label for="msg-id">Message ID</label>
+                    <input type="text" id="msg-id" placeholder="Enter the message ID" required>
+                </div>
+                <div class="form-group">
+                    <label for="receive-password">Password</label>
+                    <input type="password" id="receive-password" placeholder="Enter the password" required>
+                </div>
+                <div class="form-group">
+                    <label for="aes-key">AES Key</label>
+                    <input type="text" id="aes-key" placeholder="Enter the AES key" required>
+                </div>
+                <button type="submit" class="btn" id="receive-btn">Decrypt Message</button>
+            </form>
+
+            <div id="receive-result" class="result">
+                <h3>Secret Message Decrypted!</h3>
+                <div class="secret-message" id="decrypted-message"></div>
+                <div class="warning">
+                    This message has been permanently deleted from the server.
+                </div>
+            </div>
+
+            <div id="receive-error" class="result">
+                <h3>Error</h3>
+                <p id="receive-error-msg"></p>
+                <p id="remaining-tries" class="tries-warning"></p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Powered by AES-256-GCM Encryption | Messages self-destruct after reading or 3 failed attempts</p>
+        </footer>
+    </div>
+
+    <script>
+        function showTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('save-tab').classList.toggle('hidden', tab !== 'save');
+            document.getElementById('receive-tab').classList.toggle('hidden', tab !== 'receive');
+
+            // Hide all result boxes when switching tabs
+            document.getElementById('save-result').style.display = 'none';
+            document.getElementById('save-error').style.display = 'none';
+            document.getElementById('receive-result').style.display = 'none';
+            document.getElementById('receive-error').style.display = 'none';
+        }
+
+        async function saveMessage(event) {
+            event.preventDefault();
+
+            const message = document.getElementById('message').value;
+            const btn = document.getElementById('save-btn');
+
+            btn.disabled = true;
+            btn.textContent = 'Encrypting...';
+
+            document.getElementById('save-result').style.display = 'none';
+            document.getElementById('save-error').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('result-id').textContent = data.id;
+                    document.getElementById('result-password').textContent = data.password;
+                    document.getElementById('result-key').textContent = data.aesKey;
+                    document.getElementById('save-result').style.display = 'block';
+                    document.getElementById('message').value = '';
+                } else {
+                    document.getElementById('save-error-msg').textContent = data.errorMessage;
+                    document.getElementById('save-error').classList.add('error');
+                    document.getElementById('save-error').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('save-error-msg').textContent = 'Network error: ' + error.message;
+                document.getElementById('save-error').classList.add('error');
+                document.getElementById('save-error').style.display = 'block';
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Encrypt & Save';
+        }
+
+        async function receiveMessage(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('msg-id').value;
+            const password = document.getElementById('receive-password').value;
+            const aesKey = document.getElementById('aes-key').value;
+            const btn = document.getElementById('receive-btn');
+
+            btn.disabled = true;
+            btn.textContent = 'Decrypting...';
+
+            document.getElementById('receive-result').style.display = 'none';
+            document.getElementById('receive-error').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/receive', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id, password, aesKey }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('decrypted-message').textContent = data.message;
+                    document.getElementById('receive-result').style.display = 'block';
+                    document.getElementById('msg-id').value = '';
+                    document.getElementById('receive-password').value = '';
+                    document.getElementById('aes-key').value = '';
+                } else {
+                    document.getElementById('receive-error-msg').textContent = data.errorMessage;
+                    if (data.remainingTries !== null && data.remainingTries !== undefined) {
+                        if (data.remainingTries > 0) {
+                            document.getElementById('remaining-tries').textContent =
+                                'Remaining attempts: ' + data.remainingTries;
+                        } else {
+                            document.getElementById('remaining-tries').textContent =
+                                'Message has been deleted due to too many failed attempts!';
+                        }
+                    } else {
+                        document.getElementById('remaining-tries').textContent = '';
+                    }
+                    document.getElementById('receive-error').classList.add('error');
+                    document.getElementById('receive-error').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('receive-error-msg').textContent = 'Network error: ' + error.message;
+                document.getElementById('remaining-tries').textContent = '';
+                document.getElementById('receive-error').classList.add('error');
+                document.getElementById('receive-error').style.display = 'block';
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Decrypt Message';
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 1500);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # NATS Server
+  nats:
+    image: nats:2.10-alpine
+    container_name: secret-agency-nats
+    ports:
+      - "4222:4222"   # Client connections
+      - "8222:8222"   # HTTP monitoring
+      - "6222:6222"   # Cluster routing (optional)
+    volumes:
+      - ./docker/nats/nats-server.conf:/etc/nats/nats-server.conf:ro
+    command: ["-c", "/etc/nats/nats-server.conf"]
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - secret-network
+
+  # PostgreSQL Database (for production persistence)
+  postgres:
+    image: postgres:16-alpine
+    container_name: secret-agency-db
+    environment:
+      POSTGRES_DB: secretdb
+      POSTGRES_USER: secretuser
+      POSTGRES_PASSWORD: secretpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U secretuser -d secretdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - secret-network
+
+  # Crypto Service (Spring Boot)
+  crypto-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: secret-agency-crypto
+    environment:
+      # Spring profile
+      SPRING_PROFILES_ACTIVE: docker
+      # NATS configuration
+      NATS_URL: nats://nats:4222
+      # Database configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: secretdb
+      DB_USERNAME: secretuser
+      DB_PASSWORD: secretpass
+      # Crypto configuration (configurable via env)
+      CRYPTO_KEY_LENGTH: ${CRYPTO_KEY_LENGTH:-256}
+      CRYPTO_MAX_TRIES: ${CRYPTO_MAX_TRIES:-3}
+      CRYPTO_MAX_AGE_DAYS: ${CRYPTO_MAX_AGE_DAYS:-2}
+      CRYPTO_CLEANUP_INTERVAL_MS: ${CRYPTO_CLEANUP_INTERVAL_MS:-3600000}
+      # Java options
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    ports:
+      - "8080:8080"
+    depends_on:
+      nats:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    networks:
+      - secret-network
+
+networks:
+  secret-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

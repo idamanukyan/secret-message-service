@@ -1,0 +1,70 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Environment / Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+secrets.yml
+
+# Claude Code
+.claude/
+
+# Test databases
+*.db
+*.mv.db
+*.trace.db
+
+# Native image
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Package files
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar

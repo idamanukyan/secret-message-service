@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: crypto-service-test
+
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+nats:
+  server:
+    url: ${NATS_URL:nats://localhost:4222}
+  connection:
+    name: crypto-service-test
+    timeout: 10
+  reconnect:
+    max-attempts: 5
+    wait-ms: 1000
+
+crypto:
+  aes:
+    key-length: 256
+  max-tries: 3
+  cleanup:
+    max-age-days: 2
+    interval-ms: 3600000
+
+logging:
+  level:
+    root: INFO
+    com.agency.crypto: DEBUG

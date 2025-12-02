@@ -1,0 +1,50 @@
+version: '3.8'
+
+# Development compose file with H2 in-memory database
+# Usage: docker-compose -f docker-compose.dev.yml up
+
+services:
+  # NATS Server
+  nats:
+    image: nats:2.10-alpine
+    container_name: secret-agency-nats-dev
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - ./docker/nats/nats-server.conf:/etc/nats/nats-server.conf:ro
+    command: ["-c", "/etc/nats/nats-server.conf"]
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - secret-network-dev
+
+  # Crypto Service with H2
+  crypto-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: secret-agency-crypto-dev
+    environment:
+      NATS_URL: nats://nats:4222
+      # Configurable parameters
+      CRYPTO_KEY_LENGTH: ${CRYPTO_KEY_LENGTH:-256}
+      CRYPTO_MAX_TRIES: ${CRYPTO_MAX_TRIES:-3}
+      CRYPTO_MAX_AGE_DAYS: ${CRYPTO_MAX_AGE_DAYS:-2}
+    ports:
+      - "8080:8080"
+    depends_on:
+      nats:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - secret-network-dev
+
+networks:
+  secret-network-dev:
+    driver: bridge
